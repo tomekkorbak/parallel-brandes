@@ -30,6 +30,15 @@ void printResults(std::map<int, double> results) {
     }
 }
 
+void writeResults(std::map<int, double> results, char* file_path) {
+    std::ofstream file;
+    file.open(file_path);
+    for (const auto &p : results) {
+        file << p.first << " " << p.second << std::endl;
+    }
+    file.close();
+}
+
 std::map<int, double> compute_brandes(graphType graph, std::set<int> nodes) {
 
     std::map<int, double> C; // BC
@@ -85,8 +94,8 @@ std::map<int, double> compute_brandes(graphType graph, std::set<int> nodes) {
 }
 
 
-int main() {
-    std::ifstream infile("test/dane-2.txt");
+int main(int argc, char* argv[]) {
+    std::ifstream infile(argv[1]);
     std::set<int> nodes;
     graphType graph;
     int a, b;
@@ -96,16 +105,17 @@ int main() {
         if (it == graph.end()) {
             std::vector<int> adjList;
             adjList.push_back(b);
-            // Adding new key a and appending b onto it
             graph.insert(graphType::value_type(a, adjList));
         }
         else {
-            // Adding b under the existing key a
             graph[a].push_back(b);
         }
     }
-    printGraph(graph, nodes);
     std::map<int, double> results = compute_brandes(graph, nodes);
-    printResults(results);
+    if (argv[3] == "-v") {
+        printGraph(graph, nodes);
+        printResults(results);
+    }
+    writeResults(results, argv[2]);
     return 0;
 }
