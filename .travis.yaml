@@ -1,0 +1,5 @@
+script:
+ - g++ main.cpp -std=c++11 -o main
+ - cd test
+ - python3 test.py
+ - python3 test2.py
