@@ -1,3 +1,8 @@
+language: cpp
+
+python:
+ - "3.4"
+
 script:
  - g++ main.cpp -std=c++11 -o main
  - cd test
