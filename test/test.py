@@ -1,7 +1,12 @@
 from collections import deque, OrderedDict
 
-#from networkx.algorithms.centrality.betweenness import betweenness_centrality
-#import networkx as nx
+# from networkx.algorithms.centrality.betweenness import betweenness_centrality
+# import networkx as nx
+
+import sys
+if sys.version_info < (3, 0):
+    sys.stdout.write("Sorry, requires Python 3.x, not Python 2.x\n")
+    sys.exit(1)
 
 def make_graph(file_path):
     nodes = set()
@@ -57,27 +62,38 @@ def brandes(V, A):
             w = S.pop()
             for v in P[w]:
                 e[v] = e[v] + (g[v]/g[w]) * (1.0 + e[w])
-                if w != s:
-                    C[w] = C[w] + e[w]
+                if s==5:
+                    print('v', v, 'w', w, 'e[v]', e[v], 'g[v]', g[v], 'g[w]', g[w], 'e[w]', e[w])
+            if w != s:
+                C[w] = C[w] + e[w]
+                
     return C
 
 
 files = [
-    ('input1.txt', 's1.txt'),
-    ('input2.txt', 's2.txt'),
-    ('input3.txt', 'output3.txt'),
-    ('input4.txt', 'output4.txt'),
-    ('input5.txt', 'output5.txt'),
+    # ('input1.txt', 's1.txt'),
+    # ('input2.txt', 's2.txt'),
+    # ('input3.txt', 'output3.txt'),
+    # ('input4.txt', 'output4.txt'),
+    # ('input5.txt', 'output5.txt'),
+    ('input6.txt', 'output6.txt'),
 ]
 for data_file, results_file in files:
     nodes, graph = make_graph(data_file)
-    #results = read_results(results_file)
+    # results = read_results(results_file)
     #print results
     results = brandes(nodes, graph)
+
+
+    # graph = nx.Graph(graph, is_directed=True)
+    # results = dict(betweenness_centrality(graph, normalized=False))
+
     results = OrderedDict(sorted(results.items()))
-    print(results)
+    # for node, children in results.items():
+    #     print(node, ': ', children)
+    # print(results)
     write_results(results_file, results)
     
-    #graph = nx.Graph(graph, is_directed=True)
-    #print betweenness_centrality(graph, normalized=False)
-    #print brandes(nodes, graph) == results
+    # graph = nx.Graph(graph, is_directed=True)
+    # results = betweenness_centrality(graph, normalized=False)
+    # print brandes(nodes, graph) == results

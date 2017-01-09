@@ -30,6 +30,12 @@ void printResults(std::map<int, double> results) {
     }
 }
 
+void printE(std::map<int, double> e) {
+    for (const auto &p : e) {
+        std::cout << "" << p.first << ": " << p.second << '\n';
+    }
+}
+
 void writeResults(std::map<int, double> results, char* file_path) {
     std::ofstream file;
     file.open(file_path);
@@ -39,13 +45,9 @@ void writeResults(std::map<int, double> results, char* file_path) {
     file.close();
 }
 
-std::map<int, double> compute_brandes(graphType graph, std::set<int> nodes) {
 
-    std::map<int, double> C; // BC
-    for(auto node : nodes) {
-        C[node] = 0.0;
-    }
-
+void computeSubarray(std::vector<int>& nodes, int start, int end, graphType& graph, std::map<int, double>& C) {
+    std::cout << "Executing cS start " << start << " end " << end;
     for(auto s : nodes) {
         std::stack<int> S;
         std::map<int, std::vector<int> > P;
@@ -83,19 +85,49 @@ std::map<int, double> compute_brandes(graphType graph, std::set<int> nodes) {
             S.pop();
             for (auto v: P[w]) {
                 e[v] += (g[v]/g[w]) * (1.0 + e[w]);
+                if (s== 5) {
+                    std::cout << " v " << v << " w " << w << " e[v] " << e[v] << " g[v] " << g[v] << " g[w] " << g[w] << " e[w] " << e[w] << std::endl;
+
+                }
             }
             if (w != s) {
                 C[w] += e[w];
             }
         }
-
     }
+}
+
+std::map<int, double> computeBrandes(graphType graph, std::set<int> nodes, int numThreads) {
+
+    std::map<int, double> C; // BC
+    for(auto node : nodes) {
+        C[node] = 0.0;
+    }
+
+    std::vector<int> nodes_vec( nodes.begin(), nodes.end() );
+    size_t length = nodes_vec.size() / numThreads;
+    size_t remain = nodes_vec.size() % numThreads;
+    size_t i = 0;
+    int start, end;
+    while(i < nodes_vec.size()) {
+        int extraNodes = 0;
+        if(remain > 0) {
+            extraNodes = 1;
+            remain--;
+        }
+        start = i;
+        end = start + length + extraNodes;
+        computeSubarray(&nodes_vec, start, end, &graph, &C);
+        start = end;
+    }
+
+
     return C;
 }
 
 
 int main(int argc, char* argv[]) {
-    std::ifstream infile(argv[1]);
+    std::ifstream infile(argv[2]);
     std::set<int> nodes;
     graphType graph;
     int a, b;
@@ -111,11 +143,11 @@ int main(int argc, char* argv[]) {
             graph[a].push_back(b);
         }
     }
-    std::map<int, double> results = compute_brandes(graph, nodes);
-    if (argv[3] == "-v") {
-        printGraph(graph, nodes);
-        printResults(results);
-    }
-    writeResults(results, argv[2]);
+    std::map<int, double> results = computeBrandes(graph, nodes, atoi(argv[1]));
+//    if (argv[4] == "-v") {
+//    printGraph(graph, nodes);
+//        printResults(results);
+//    }
+    writeResults(results, argv[3]);
     return 0;
 }
